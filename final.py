@@ -28,6 +28,7 @@ class num_methods(qw.QWidget):
         self.plotcurve_err_euler = pg.PlotCurveItem(name='...Euler', pen=(255, 0, 0))
         self.plotcurve_err_adv_euler = pg.PlotCurveItem(name='..Improved Euler', pen=(0, 255, 0))
         self.plotcurve_err_runge_kutt = pg.PlotCurveItem(name='...Runge-Kutta', pen=(0, 0, 255))
+        self.plotcurve_ex = pg.PlotCurveItem(name='..Exact')
 
         self.plotwidget.addItem(self.plotcurve_euler)
         self.plotwidget.addItem(self.plotcurve_adv_euler)
@@ -36,6 +37,8 @@ class num_methods(qw.QWidget):
         self.plotwidget_err.addItem(self.plotcurve_err_euler)
         self.plotwidget_err.addItem(self.plotcurve_err_adv_euler)
         self.plotwidget_err.addItem(self.plotcurve_err_runge_kutt)
+
+        self.plotwidget_ex.addItem(self.plotcurve_ex)
 
         self.updateplot()
 
@@ -58,6 +61,11 @@ class num_methods(qw.QWidget):
         self.plotwidget_err.addLegend()
         self.plotwidget_err.showGrid(x=True, y=True, alpha=0.3)
         hbox.addWidget(self.plotwidget_err, 0, 4, 3, 3)
+
+        self.plotwidget_ex = pg.PlotWidget()
+        self.plotwidget_ex.addLegend()
+        self.plotwidget_ex.showGrid(x=True, y=True, alpha=0.3)
+        hbox.addWidget(self.plotwidget_ex, 4, 4, 8, 3)
 
         self.btn_set_step = qw.QPushButton('Set step')
         self.btn_set_reg = qw.QPushButton('Set region')
@@ -174,6 +182,7 @@ class num_methods(qw.QWidget):
         data_1, err_1 = self.euler()
         data_2, err_2 = self.adv_euler()
         data_3, err_3 = self.runge_kutta_mon()
+        data_4 = self.plot_exact()
 
         self.plotcurve_euler.setData(x=self.x_axis, y=data_1)
         self.plotcurve_adv_euler.setData(x=self.x_axis, y=data_2)
@@ -183,6 +192,8 @@ class num_methods(qw.QWidget):
         self.plotcurve_err_adv_euler.setData(x=self.x_axis, y=err_2)
         self.plotcurve_err_runge_kutt.setData(x=self.x_axis, y=err_3)
 
+        self.plotcurve_ex.setData(x=self.x_axis, y=data_4)
+
     # ////////////////MATH GOES FROM HERE////////////////////////////////////////////////////////
 
     def func(self, x, y):
@@ -190,6 +201,17 @@ class num_methods(qw.QWidget):
 
     def exact(self, x):
         return self.c1 * np.e ** (-x) - x + 1
+
+    def plot_exact(self):
+        y_axis = np.zeros(len(self.x_axis), dtype=float)
+
+        counter = 0
+
+        for x in self.x_axis:
+            y_axis[counter] = self.exact(x)
+            counter += 1
+
+        return y_axis
 
     def euler(self):
         y_axis = np.zeros(len(self.x_axis), dtype=float)
